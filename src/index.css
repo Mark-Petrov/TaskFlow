@@ -1,0 +1,722 @@
+@import "tailwindcss";
+
+@theme {
+  --color-neo-bg: #f2f0eb;
+  --color-neo-surface: #ffffff;
+  --color-neo-ink: #111111;
+  --color-neo-muted: #6b6b6b;
+  --color-neo-accent: #0066ff;
+  --color-neo-accent-hover: #0052cc;
+  --color-neo-yellow: #ffe566;
+  --color-neo-red: #ff4757;
+  --color-neo-green: #2ed573;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --shadow-neo: 3px 3px 0 0 #111111;
+  --shadow-neo-sm: 2px 2px 0 0 #111111;
+  --shadow-neo-lg: 4px 4px 0 0 #111111;
+  --radius-neo: 10px;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body, #root {
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-neo-bg);
+  color: var(--color-neo-ink);
+}
+
+/* ── Typography ── */
+.neo-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+.neo-label {
+  font-family: var(--font-display);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-neo-muted);
+}
+
+/* ── Surfaces ── */
+.neo-surface {
+  background: var(--color-neo-surface);
+  border: 2px solid var(--color-neo-ink);
+  border-radius: var(--radius-neo);
+  box-shadow: var(--shadow-neo);
+}
+
+.neo-surface-flat {
+  background: var(--color-neo-surface);
+  border: 2px solid var(--color-neo-ink);
+  border-radius: var(--radius-neo);
+}
+
+/* ── Buttons ── */
+.neo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.625rem 1.25rem;
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-weight: 700;
+  border: 2px solid var(--color-neo-ink);
+  border-radius: var(--radius-neo);
+  box-shadow: var(--shadow-neo-sm);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.neo-btn:active:not(:disabled) {
+  transform: translate(1px, 1px);
+  box-shadow: none;
+}
+
+.neo-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.neo-btn-primary {
+  background: var(--color-neo-accent);
+  color: #fff;
+}
+
+.neo-btn-primary:hover:not(:disabled) {
+  background: var(--color-neo-accent-hover);
+}
+
+.neo-btn-secondary {
+  background: var(--color-neo-surface);
+  color: var(--color-neo-ink);
+}
+
+.neo-btn-secondary:hover:not(:disabled) {
+  background: var(--color-neo-bg);
+}
+
+.neo-btn-danger {
+  background: var(--color-neo-red);
+  color: #fff;
+}
+
+.neo-btn-ghost {
+  background: transparent;
+  box-shadow: none;
+  border-color: transparent;
+  color: var(--color-neo-muted);
+}
+
+.neo-btn-ghost:hover:not(:disabled) {
+  background: var(--color-neo-bg);
+  border-color: var(--color-neo-ink);
+  box-shadow: var(--shadow-neo-sm);
+}
+
+.neo-btn-icon {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+}
+
+/* ── Inputs ── */
+.neo-input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9375rem;
+  background: var(--color-neo-surface);
+  border: 2px solid var(--color-neo-ink);
+  border-radius: var(--radius-neo);
+  outline: none;
+  transition: box-shadow 0.15s ease;
+}
+
+.neo-input:focus {
+  box-shadow: var(--shadow-neo-sm);
+}
+
+.neo-input::placeholder {
+  color: #aaa;
+}
+
+.neo-textarea {
+  min-height: 96px;
+  resize: none;
+}
+
+/* ── FAB ── */
+.neo-fab {
+  position: fixed;
+  bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 52px;
+  padding: 0 1.5rem;
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--color-neo-ink);
+  border: 2px solid var(--color-neo-ink);
+  border-radius: 999px;
+  box-shadow: var(--shadow-neo-lg);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.neo-fab:active {
+  transform: translateX(-50%) translate(2px, 2px);
+  box-shadow: var(--shadow-neo-sm);
+}
+
+/* ── Bottom Nav ── */
+.neo-nav {
+  position: fixed;
+  bottom: 0;
+  inset-inline: 0;
+  z-index: 30;
+  background: var(--color-neo-surface);
+  border-top: 2px solid var(--color-neo-ink);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.neo-nav-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 64px;
+  min-height: 52px;
+  padding: 0.375rem 1rem;
+  font-family: var(--font-display);
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-neo-muted);
+  border: 2px solid transparent;
+  border-radius: var(--radius-neo);
+  transition: all 0.15s ease;
+}
+
+.neo-nav-link.active {
+  color: var(--color-neo-ink);
+  background: var(--color-neo-yellow);
+  border-color: var(--color-neo-ink);
+  box-shadow: var(--shadow-neo-sm);
+}
+
+/* ── Sheet / Modal ── */
+.neo-sheet-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: rgba(17, 17, 17, 0.5);
+}
+
+.neo-sheet {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 32rem;
+  max-height: min(88vh, 100dvh);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--color-neo-surface);
+  border: 2px solid var(--color-neo-ink);
+  border-bottom: none;
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -4px 0 0 var(--color-neo-ink);
+}
+
+.neo-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  padding: 1rem 1.25rem;
+  border-bottom: 2px solid var(--color-neo-ink);
+}
+
+.neo-sheet-body {
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  padding: 1rem 1.25rem 1.5rem;
+}
+
+.neo-sheet-title {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* ── Kanban ── */
+.neo-column {
+  flex-shrink: 0;
+  width: 17.5rem;
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+  padding: 0.75rem;
+  background: var(--color-neo-surface);
+  border: 2px solid var(--color-neo-ink);
+  border-radius: var(--radius-neo);
+  box-shadow: var(--shadow-neo);
+}
+
+.neo-column-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.375rem;
+  height: 1.375rem;
+  padding: 0 0.375rem;
+  font-family: var(--font-display);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  background: var(--color-neo-ink);
+  color: #fff;
+  border-radius: 4px;
+}
+
+/* ── Task card (user-customizable) ── */
+.neo-task-card {
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem;
+  border-radius: 8px;
+  transition: transform 0.1s ease;
+  cursor: pointer;
+}
+
+.neo-task-card:active {
+  transform: scale(0.98);
+}
+
+.neo-task-card-dragging {
+  opacity: 0.45;
+  transform: rotate(2deg) scale(1.02);
+  box-shadow: var(--shadow-neo-lg) !important;
+}
+
+.neo-column-drag-over {
+  background: var(--color-neo-yellow);
+  outline: 2px dashed var(--color-neo-ink);
+  outline-offset: -4px;
+}
+
+/* ── Badges ── */
+.neo-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-display);
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.125rem 0.375rem;
+  color: #fff;
+  border: 1.5px solid var(--color-neo-ink);
+  border-radius: 4px;
+}
+
+/* ── Color swatch ── */
+.neo-swatch {
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--color-neo-ink);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.neo-swatch.selected {
+  box-shadow: var(--shadow-neo-sm);
+  transform: translate(-1px, -1px);
+}
+
+.neo-swatch-sm {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+}
+
+/* ── Segmented control ── */
+.neo-segment {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.neo-segment-btn {
+  min-height: 40px;
+  padding: 0.5rem 0.75rem;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--color-neo-surface);
+  border: 2px solid var(--color-neo-ink);
+  border-radius: 8px;
+  transition: all 0.1s ease;
+}
+
+.neo-segment-btn.selected {
+  background: var(--color-neo-yellow);
+  box-shadow: var(--shadow-neo-sm);
+}
+
+/* ── Board list item ── */
+.neo-board-item {
+  display: flex;
+  align-items: center;
+  background: var(--color-neo-surface);
+  border: 2px solid var(--color-neo-ink);
+  border-radius: var(--radius-neo);
+  box-shadow: var(--shadow-neo);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.neo-board-item:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+/* ── Header bar ── */
+.neo-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--color-neo-surface);
+  border-bottom: 2px solid var(--color-neo-ink);
+  padding: 0.75rem 1rem;
+}
+
+/* ── Animations ── */
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+/* ── Dot grid background ── */
+.neo-dot-bg {
+  background-image: radial-gradient(circle, #ccc 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* ── Neo Checkbox ── */
+.neo-checkbox {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-neo-surface);
+  border: 2.5px solid var(--color-neo-ink);
+  border-radius: 6px;
+  box-shadow: var(--shadow-neo-sm);
+  transition: background 0.1s ease, transform 0.1s ease, box-shadow 0.1s ease;
+  cursor: pointer;
+}
+
+.neo-checkbox:active {
+  transform: translate(1px, 1px);
+  box-shadow: none;
+}
+
+.neo-checkbox-checked {
+  background: var(--color-neo-accent);
+  border-color: var(--color-neo-ink);
+}
+
+/* ── List rows ── */
+.neo-list-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 2px solid var(--color-neo-ink);
+  border-radius: var(--radius-neo);
+  box-shadow: var(--shadow-neo-sm);
+  transition: opacity 0.15s ease;
+}
+
+.neo-list-row-done {
+  opacity: 0.5;
+}
+
+/* ── Mode switcher ── */
+.neo-mode-switch {
+  display: inline-flex;
+  border: 2px solid var(--color-neo-ink);
+  border-radius: var(--radius-neo);
+  overflow: hidden;
+  box-shadow: var(--shadow-neo-sm);
+}
+
+.neo-mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 36px;
+  padding: 0.375rem 0.75rem;
+  font-family: var(--font-display);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--color-neo-surface);
+  color: var(--color-neo-muted);
+  border-right: 2px solid var(--color-neo-ink);
+  transition: background 0.1s ease;
+}
+
+.neo-mode-btn:last-child {
+  border-right: none;
+}
+
+.neo-mode-btn.active {
+  background: var(--color-neo-yellow);
+  color: var(--color-neo-ink);
+}
+
+.neo-mode-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.neo-mode-switch-compact .neo-mode-btn {
+  padding: 0.375rem 0.5rem;
+  font-size: 0.625rem;
+}
+
+/* ── Shopping list (minimal) ── */
+.shopping-board-layout {
+  height: 100dvh;
+  max-height: 100dvh;
+}
+
+.shopping-board-layout main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding-bottom: 0 !important;
+}
+
+.shopping-header {
+  border-bottom: 1px solid var(--color-neo-ink);
+  box-shadow: none;
+}
+
+.shopping-list {
+  flex: 1;
+  min-height: 0;
+  background: var(--color-neo-surface);
+}
+
+.shopping-list-body {
+  flex: 1;
+  min-height: 0;
+}
+
+.shopping-empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--color-neo-muted);
+}
+
+.shopping-row {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.12);
+  background: var(--color-neo-surface);
+}
+
+.shopping-row-done {
+  opacity: 0.55;
+}
+
+.shopping-row-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.shopping-row-delete {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  color: var(--color-neo-muted);
+  border: none;
+  background: transparent;
+  transition: color 0.1s ease;
+}
+
+.shopping-row-delete:hover {
+  color: var(--color-neo-red);
+}
+
+.shopping-divider-label {
+  padding: 0.5rem 1rem 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-neo-muted);
+  border-bottom: 1px solid rgba(17, 17, 17, 0.12);
+}
+
+.shopping-input-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  padding-bottom: calc(0.625rem + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--color-neo-ink);
+  background: var(--color-neo-surface);
+  flex-shrink: 0;
+}
+
+.shopping-input {
+  flex: 1;
+  min-height: 44px;
+  padding: 0 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.2);
+  border-radius: 0;
+  outline: none;
+}
+
+.shopping-input:focus {
+  border-bottom-color: var(--color-neo-ink);
+}
+
+.shopping-input::placeholder {
+  color: #aaa;
+}
+
+.shopping-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  color: var(--color-neo-ink);
+  background: transparent;
+  border: 1px solid var(--color-neo-ink);
+  border-radius: var(--radius-neo);
+  transition: background 0.1s ease;
+}
+
+.shopping-add-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.shopping-add-btn:not(:disabled):active {
+  background: var(--color-neo-yellow);
+}
+
+.neo-notif-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--color-neo-red);
+  border: 1.5px solid var(--color-neo-ink);
+  border-radius: 999px;
+}
+
+.neo-notif-item {
+  padding: 0.75rem;
+  border: 2px solid var(--color-neo-ink);
+  border-radius: 8px;
+  background: var(--color-neo-surface);
+  transition: background 0.1s ease;
+}
+
+.neo-notif-item:active {
+  background: var(--color-neo-bg);
+}
+
+.neo-notif-unread {
+  background: var(--color-neo-yellow);
+  box-shadow: var(--shadow-neo-sm);
+}
+
+.neo-toast {
+  position: fixed;
+  bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  width: calc(100% - 2rem);
+  max-width: 24rem;
+  padding: 0.75rem 0.5rem 0.75rem 1rem;
+  background: var(--color-neo-surface);
+  border: 2px solid var(--color-neo-ink);
+  border-radius: var(--radius-neo);
+  box-shadow: var(--shadow-neo-lg);
+}

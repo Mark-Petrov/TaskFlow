@@ -1,0 +1,34 @@
+# Git
+.git
+.gitignore
+
+# Dependencies & build output
+node_modules
+server/node_modules
+dist
+server/dist
+
+# Local env & secrets
+.env
+.env.local
+.env.*.local
+server/.env
+
+# SQLite dev database
+server/prisma/dev.db
+server/prisma/dev.db-journal
+server/prisma/*.db
+server/prisma/*.db-journal
+
+# Editor & OS
+.vscode
+.idea
+.DS_Store
+*.log
+
+# Docker
+docker-compose.override.yml
+
+# Docs / misc
+agent-transcripts
+assets
