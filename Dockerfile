@@ -9,7 +9,7 @@ RUN npm install \
 
 # Схема БД → Prisma client генерируется внутри контейнера (не копируем node_modules с хоста)
 COPY server/prisma ./prisma
-RUN npx prisma generate
+RUN ./node_modules/.bin/prisma generate
 
 # Готовые артефакты (собираются локально: npm run build:deploy)
 COPY server/dist ./dist
