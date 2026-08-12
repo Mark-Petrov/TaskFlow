@@ -5,8 +5,11 @@ FROM node:20-alpine AS frontend-builder
 
 WORKDIR /app
 
+# NODE_ENV=production на хосте отключает devDependencies (typescript, vite)
+ENV NODE_ENV=development
+
 COPY package.json package-lock.json ./
-RUN npm install \
+RUN npm install --include=dev \
   && npm cache clean --force
 
 COPY index.html vite.config.ts tsconfig.json tsconfig.app.json tsconfig.node.json ./
@@ -16,21 +19,23 @@ COPY public ./public
 ARG VITE_API_URL=/api
 ENV VITE_API_URL=$VITE_API_URL
 
-RUN npm run build
+RUN npx tsc -b && npx vite build
 
 # ── Stage 2: build Express backend ─────────────────────────────────────────────
 FROM node:20-alpine AS backend-builder
 
 WORKDIR /app
 
+ENV NODE_ENV=development
+
 COPY server/package.json server/package-lock.json ./
-RUN npm install \
+RUN npm install --include=dev \
   && npm cache clean --force
 
 COPY server/ ./
 
 RUN npx prisma generate \
-  && npm run build
+  && npx tsc
 
 # ── Stage 3: production runtime ──────────────────────────────────────────────
 FROM node:20-alpine AS production
