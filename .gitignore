@@ -9,11 +9,7 @@ lerna-debug.log*
 
 node_modules
 dist-ssr
-frontend/dist
-.env
-.env.local
-server/node_modules
-server/dist
+# frontend/dist и server/dist — артефакты деплоя (собираются локально, можно коммитить в git)
 server/prisma/dev.db
 server/prisma/dev.db-journal
 server/.env

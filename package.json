@@ -9,7 +9,7 @@
     "dev:all": "npm run dev:server & npm run dev",
     "build": "tsc -b && vite build",
     "build:server": "npm run build --prefix server",
-    "build:docker": "npm run build && npm run build:server && npm run db:generate --prefix server",
+    "build:deploy": "npm run build && npm run build:server && npm run db:generate --prefix server",
     "lint": "oxlint",
     "preview": "vite preview",
     "db:push": "npm run db:push --prefix server"

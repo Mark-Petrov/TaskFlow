@@ -1,62 +1,88 @@
 # Деплой TaskFlow на VPS (Docker)
 
-TaskFlow собирается **multi-stage Docker-образом** (`node:20-alpine`):
+**Сборка — локально на вашем компьютере.** Сервер только скачивает npm-зависимости бэкенда и запускает готовый код. Никакого TypeScript, Vite и Prisma generate на VPS — это решает проблемы с RAM и таймаутами npm.
 
-1. **frontend-builder** — Vite-сборка React → `frontend/dist/`
-2. **backend-builder** — TypeScript + Prisma → `server/dist/`
-3. **production** — только production-зависимости бэкенда и готовые артефакты
+## Схема
 
-Финальный образ лёгкий: без исходников, dev-зависимостей и инструментов сборки.
+```
+[Ваш Mac/PC]  npm run build:deploy  →  frontend/dist + server/dist
+       ↓ git push / rsync / scp
+[VPS]         docker compose up --build -d  →  готово за ~30 сек
+```
 
-## Требования
+---
 
-- VPS с Ubuntu 22.04+ (или другой Linux)
-- Docker Engine 24+ и Docker Compose v2
-- Открытый порт **3000** (или тот, что зададите в `.env`)
-- Домен (опционально, для HTTPS через Nginx/Caddy)
-
-> На сервере с малым объёмом RAM (~1 GB) добавьте swap перед сборкой или собирайте образ локально/в CI и пушьте в registry.
-
-## Быстрый старт
-
-### 1. Установите Docker на сервер
+## 1. Локальная сборка (один раз перед деплоем)
 
 ```bash
+cd TaskFlow
+npm install
+npm install --prefix server
+npm run build:deploy
+```
+
+Проверьте, что появились папки:
+
+```bash
+ls frontend/dist/index.html
+ls server/dist/index.js
+ls server/node_modules/.prisma
+```
+
+---
+
+## 2. Отправка на сервер
+
+**Через Git** (рекомендуется — `frontend/dist` и `server/dist` не в `.gitignore`):
+
+```bash
+git add frontend/dist server/dist
+git commit -m "build: deploy artifacts"
+git push origin main
+```
+
+**Через архив** (если не хотите коммитить dist):
+
+```bash
+tar czf deploy.tar.gz \
+  Dockerfile docker-compose.yml .env.example \
+  server/package.json server/package-lock.json \
+  server/prisma server/dist server/node_modules/.prisma \
+  frontend/dist
+scp deploy.tar.gz root@YOUR_SERVER:/root/TaskFlow/
+```
+
+---
+
+## 3. Настройка сервера (первый раз)
+
+```bash
+# Docker
 curl -fsSL https://get.docker.com | sh
-sudo usermod -aG docker $USER
-# перелогиньтесь, чтобы группа docker применилась
-```
 
-### 2. Скопируйте проект на сервер
+# Проект
+git clone https://github.com/Mark-Petrov/TaskFlow.git
+cd TaskFlow
 
-```bash
-git clone <url-репозитория> taskflow
-cd taskflow
-```
-
-Или загрузите архив и распакуйте.
-
-### 3. Настройте переменные окружения
-
-```bash
+# Переменные окружения
 cp .env.example .env
-nano .env
+nano .env   # JWT_SECRET и CORS_ORIGIN
 ```
 
-Обязательно измените:
+Обязательно в `.env`:
 
-| Переменная | Описание |
+| Переменная | Пример |
 |---|---|
-| `JWT_SECRET` | Случайная строка (`openssl rand -hex 32`) |
-| `CORS_ORIGIN` | Публичный URL приложения, напр. `https://taskflow.example.com` |
+| `JWT_SECRET` | `openssl rand -hex 32` |
+| `CORS_ORIGIN` | `http://123.45.67.89:3000` или ваш домен |
 
-### 4. Запустите
+---
+
+## 4. Запуск на сервере
 
 ```bash
-docker compose up -d --build
+docker compose up --build -d
 ```
-
-Сборка фронтенда и бэкенда выполняется автоматически внутри Docker (multi-stage). Отдельный `npm run build:docker` на хосте **не нужен**.
 
 Проверка:
 
@@ -65,104 +91,77 @@ curl http://localhost:3000/api/health
 # {"ok":true,"service":"taskflow-api"}
 ```
 
-Откройте в браузере: `http://<IP-сервера>:3000`
+---
 
-### 5. Полезные команды
+## 5. Обновление после изменений в коде
+
+**На Mac:**
 
 ```bash
-# Логи
-docker compose logs -f taskflow
-
-# Остановка
-docker compose down
-
-# Пересборка после обновления кода
-docker compose up -d --build
-
-# Статус
-docker compose ps
+npm run build:deploy
+git add -A && git commit -m "update" && git push
 ```
 
-## HTTPS через Nginx (рекомендуется)
+**На сервере:**
 
-Пример конфига `/etc/nginx/sites-available/taskflow`:
-
-```nginx
-server {
-    listen 80;
-    server_name taskflow.example.com;
-    return 301 https://$host$request_uri;
-}
-
-server {
-    listen 443 ssl http2;
-    server_name taskflow.example.com;
-
-    ssl_certificate     /etc/letsencrypt/live/taskflow.example.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/taskflow.example.com/privkey.pem;
-
-    location / {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
+```bash
+git pull
+docker compose up --build -d
 ```
+
+---
+
+## Полезные команды
+
+```bash
+docker compose logs -f taskflow   # логи
+docker compose down             # остановка
+docker compose ps               # статус
+```
+
+---
+
+## HTTPS через Nginx
 
 После настройки SSL обновите `.env`:
 
 ```env
-CORS_ORIGIN=https://taskflow.example.com
+CORS_ORIGIN=https://your-domain.com
 ```
-
-И перезапустите контейнер:
 
 ```bash
 docker compose up -d
 ```
 
-## Данные и резервное копирование
+Пример конфига Nginx — см. раздел ниже в этом файле или стандартный reverse proxy на порт `3000`.
 
-SQLite-файл хранится в volume `taskflow-data` по пути `/data/taskflow.db` внутри контейнера.
+---
+
+## Бэкап базы SQLite
 
 ```bash
-# Путь к volume на хосте
-docker volume inspect taskflow-data
-
-# Бэкап базы
-docker compose exec taskflow cp /data/taskflow.db /data/taskflow.db.bak
-docker cp taskflow:/data/taskflow.db ./taskflow-backup.db
+docker cp taskflow:/data/taskflow.db ./backup.db
 ```
 
-## PostgreSQL (опционально)
-
-Для больших нагрузок можно перейти на PostgreSQL:
-
-1. В `server/prisma/schema.prisma` смените `provider` на `"postgresql"`.
-2. Добавьте сервис `postgres` в `docker-compose.yml`.
-3. Укажите `DATABASE_URL=postgresql://...` в `.env`.
-4. Пересоберите образ: `docker compose up -d --build`.
+---
 
 ## Локальная разработка (без Docker)
 
 ```bash
 cd server && cp .env.example .env && npm install && npm run db:push
-cd .. && npm install
-npm run dev:all
+cd .. && npm install && npm run dev:all
 ```
 
 Фронтенд: `http://localhost:5173`, API: `http://localhost:3001`.
 
+---
+
 ## Устранение неполадок
 
-| Проблема | Решение |
+| Ошибка | Решение |
 |---|---|
-| `JWT_SECRET is not set` | Заполните `JWT_SECRET` в `.env` |
-| CORS / WebSocket ошибки | `CORS_ORIGIN` должен совпадать с URL в браузере |
-| Пустая база после деплоя | Проверьте volume: `docker volume ls` |
-| Контейнер перезапускается | `docker compose logs taskflow` — часто неверный `DATABASE_URL` |
+| `COPY server/dist failed` | Запустите `npm run build:deploy` локально и залейте на сервер |
+| `COPY frontend/dist failed` | То же — нужна локальная сборка фронтенда |
+| `COPY server/node_modules/.prisma failed` | `npm run db:generate --prefix server` локально |
+| CORS / WebSocket | `CORS_ORIGIN` = URL в браузере |
+| `JWT_SECRET is not set` | Заполните `.env` на сервере |

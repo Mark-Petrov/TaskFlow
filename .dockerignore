@@ -2,12 +2,19 @@
 .git
 .gitignore
 
-# Dependencies & build output (собираются внутри multi-stage Dockerfile)
+# Dependencies (кроме сгенерированного Prisma client — см. ! ниже)
 node_modules
 server/node_modules
+!server/node_modules/.prisma
+!server/node_modules/.prisma/**
+
+# Исходники не нужны в образе — только dist
+src
+server/src
+server/tsconfig.json
+
+# Старый корневой dist (vite legacy)
 dist
-frontend/dist
-server/dist
 
 # Local env & secrets
 .env
@@ -33,3 +40,5 @@ docker-compose.override.yml
 # Docs / misc
 agent-transcripts
 assets
+
+# frontend/dist и server/dist НЕ игнорируем — они копируются в образ
