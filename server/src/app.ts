@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import path from 'path'
+import { existsSync } from 'fs'
 import { fileURLToPath } from 'url'
 import authRoutes from './routes/auth.js'
 import boardsRoutes from './routes/boards.js'
@@ -11,7 +12,16 @@ import notificationsRoutes from './routes/notifications.js'
 import profileRoutes from './routes/profile.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const publicDir = path.join(__dirname, '../public')
+
+function resolvePublicDir(): string {
+  const candidates = [
+    path.join(__dirname, 'public'),
+    path.join(__dirname, '..', 'public'),
+  ]
+  return candidates.find(dir => existsSync(dir)) ?? candidates[0]
+}
+
+const publicDir = resolvePublicDir()
 
 const app = express()
 

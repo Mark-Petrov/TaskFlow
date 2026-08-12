@@ -1,4 +1,7 @@
 import 'dotenv/config'
+import { execSync } from 'node:child_process'
+import { mkdirSync } from 'node:fs'
+import path from 'node:path'
 import { createServer } from 'http'
 import { Server } from 'socket.io'
 import jwt from 'jsonwebtoken'
@@ -47,6 +50,20 @@ io.on('connection', (socket) => {
     socket.leave(`board:${boardId}`)
   })
 })
+
+function ensureDatabase() {
+  if (process.env.NODE_ENV !== 'production') return
+
+  const dbUrl = process.env.DATABASE_URL ?? ''
+  if (dbUrl.startsWith('file:')) {
+    const filePath = dbUrl.replace(/^file:/, '')
+    mkdirSync(path.dirname(filePath), { recursive: true })
+  }
+
+  execSync('npx prisma db push --skip-generate', { stdio: 'inherit' })
+}
+
+ensureDatabase()
 
 httpServer.listen(PORT, '0.0.0.0', () => {
   console.log(`TaskFlow API + WebSocket → http://0.0.0.0:${PORT}`)

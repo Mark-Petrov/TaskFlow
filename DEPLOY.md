@@ -1,11 +1,12 @@
 # Деплой TaskFlow на VPS (Docker)
 
-TaskFlow упаковывается в **один Docker-образ**: Express отдаёт API, WebSocket и собранный React-фронтенд. База SQLite хранится в **Docker Volume** и не теряется при перезапуске контейнера.
+TaskFlow упаковывается в **лёгкий Docker-образ** (`node:20-alpine`): внутри только production-зависимости бэкенда и готовые сборки. Сборка фронтенда и компиляция TypeScript выполняются **на хосте до** `docker build`, чтобы не перегружать сервер с малым объёмом RAM.
 
 ## Требования
 
 - VPS с Ubuntu 22.04+ (или другой Linux)
 - Docker Engine 24+ и Docker Compose v2
+- **На машине сборки** (локально или CI): Node.js 20+ для `npm run build:docker`
 - Открытый порт **3000** (или тот, что зададите в `.env`)
 - Домен (опционально, для HTTPS через Nginx/Caddy)
 
@@ -42,11 +43,27 @@ nano .env
 | `JWT_SECRET` | Случайная строка (`openssl rand -hex 32`) |
 | `CORS_ORIGIN` | Публичный URL приложения, напр. `https://taskflow.example.com` |
 
-### 4. Запустите
+### 4. Соберите артефакты и запустите
+
+На сервере (или локально, затем загрузите образ):
 
 ```bash
+# Установка зависимостей (один раз)
+npm install
+npm install --prefix server
+
+# Сборка фронтенда → frontend/dist/
+# Сборка бэкенда → server/dist/ + Prisma client
+npm run build:docker
+
+# Применить схему БД (локальная dev-база; в Docker — автоматически при старте)
+# npm run db:push --prefix server
+
+# Сборка и запуск контейнера
 docker compose up -d --build
 ```
+
+Кратко: **`npm run build:docker`** создаёт `frontend/dist/` и `server/dist/`, которые копируются в образ.
 
 Проверка:
 

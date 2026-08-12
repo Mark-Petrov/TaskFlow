@@ -2,11 +2,10 @@
 .git
 .gitignore
 
-# Dependencies & build output
+# Dependencies & build output (сборки копируются в образ явно)
 node_modules
 server/node_modules
 dist
-server/dist
 
 # Local env & secrets
 .env
