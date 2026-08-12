@@ -2,14 +2,15 @@ FROM node:20-alpine
 
 WORKDIR /app/server
 
-# Зависимости бэкенда (полный install — нужен prisma CLI для generate)
+# Зависимости бэкенда (prisma и @prisma/client — в dependencies package.json)
 COPY server/package.json server/package-lock.json ./
 RUN npm install \
+  && test -f node_modules/prisma/package.json \
   && npm cache clean --force
 
-# Схема БД → Prisma client генерируется внутри контейнера (не копируем node_modules с хоста)
+# Схема БД → Prisma client генерируется локально, без npx и без сети
 COPY server/prisma ./prisma
-RUN npx --no-install prisma generate
+RUN npm run db:generate
 
 # Готовые артефакты (собираются локально: npm run build:deploy)
 COPY server/dist ./dist
