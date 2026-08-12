@@ -6,7 +6,7 @@ FROM node:22-alpine AS frontend-build
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm install
 
 COPY index.html vite.config.ts tsconfig.json tsconfig.app.json tsconfig.node.json ./
 COPY src ./src
@@ -23,7 +23,7 @@ FROM node:22-alpine AS backend-build
 WORKDIR /app
 
 COPY server/package.json server/package-lock.json ./
-RUN npm ci
+RUN npm install
 
 COPY server/ ./
 
@@ -41,7 +41,7 @@ RUN apk add --no-cache tini curl \
   && adduser -S taskflow -G taskflow
 
 COPY server/package.json server/package-lock.json ./
-RUN npm ci --omit=dev \
+RUN npm install --omit=dev \
   && npm install prisma@6.19.0 --no-save \
   && npm cache clean --force
 
