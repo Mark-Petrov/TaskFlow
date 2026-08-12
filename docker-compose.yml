@@ -1,5 +1,6 @@
 services:
   taskflow:
+    image: taskflow:latest
     build:
       context: .
       dockerfile: Dockerfile
