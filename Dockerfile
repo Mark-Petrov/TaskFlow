@@ -1,23 +1,25 @@
 FROM node:20-alpine
 
-WORKDIR /app
+WORKDIR /app/server
 
-ENV NODE_ENV=production
-
-# Только production-зависимости (без typescript, vite и т.д.)
+# Зависимости бэкенда (полный install — нужен prisma CLI для generate)
 COPY server/package.json server/package-lock.json ./
-RUN npm install --production \
+RUN npm install \
   && npm cache clean --force
 
-# Prisma + сгенерированный клиент (собирается локально: npm run build:deploy)
+# Схема БД → Prisma client генерируется внутри контейнера (не копируем node_modules с хоста)
 COPY server/prisma ./prisma
-COPY server/node_modules/.prisma ./node_modules/.prisma
+RUN npx prisma generate
 
-# Готовый бэкенд (локально: npm run build:server)
+# Готовые артефакты (собираются локально: npm run build:deploy)
 COPY server/dist ./dist
-
-# Готовый фронтенд (локально: npm run build)
 COPY frontend/dist ./public
+
+# Убираем dev-зависимости после generate — образ остаётся лёгким
+RUN npm prune --production \
+  && npm cache clean --force
+
+ENV NODE_ENV=production
 
 EXPOSE 3000
 

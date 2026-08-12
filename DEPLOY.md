@@ -1,6 +1,6 @@
 # Деплой TaskFlow на VPS (Docker)
 
-**Сборка — локально на вашем компьютере.** Сервер только скачивает npm-зависимости бэкенда и запускает готовый код. Никакого TypeScript, Vite и Prisma generate на VPS — это решает проблемы с RAM и таймаутами npm.
+**Сборка фронтенда и бэкенда — локально.** Prisma client генерируется **на сервере при `docker build`** (не копируется из git). На VPS не нужны TypeScript и Vite.
 
 ## Схема
 
@@ -26,7 +26,6 @@ npm run build:deploy
 ```bash
 ls frontend/dist/index.html
 ls server/dist/index.js
-ls server/node_modules/.prisma
 ```
 
 ---
@@ -47,7 +46,7 @@ git push origin main
 tar czf deploy.tar.gz \
   Dockerfile docker-compose.yml .env.example \
   server/package.json server/package-lock.json \
-  server/prisma server/dist server/node_modules/.prisma \
+  server/prisma server/dist \
   frontend/dist
 scp deploy.tar.gz root@YOUR_SERVER:/root/TaskFlow/
 ```
@@ -162,6 +161,6 @@ cd .. && npm install && npm run dev:all
 |---|---|
 | `COPY server/dist failed` | Запустите `npm run build:deploy` локально и залейте на сервер |
 | `COPY frontend/dist failed` | То же — нужна локальная сборка фронтенда |
-| `COPY server/node_modules/.prisma failed` | `npm run db:generate --prefix server` локально |
+| `prisma generate` timeout | Проблема с сетью на сервере; повторите `docker compose build` |
 | CORS / WebSocket | `CORS_ORIGIN` = URL в браузере |
 | `JWT_SECRET is not set` | Заполните `.env` на сервере |

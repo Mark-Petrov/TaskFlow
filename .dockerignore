@@ -2,11 +2,9 @@
 .git
 .gitignore
 
-# Dependencies (кроме сгенерированного Prisma client — см. ! ниже)
+# Dependencies
 node_modules
 server/node_modules
-!server/node_modules/.prisma
-!server/node_modules/.prisma/**
 
 # Исходники не нужны в образе — только dist
 src
