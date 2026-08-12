@@ -1,14 +1,21 @@
 # Деплой TaskFlow на VPS (Docker)
 
-TaskFlow упаковывается в **лёгкий Docker-образ** (`node:20-alpine`): внутри только production-зависимости бэкенда и готовые сборки. Сборка фронтенда и компиляция TypeScript выполняются **на хосте до** `docker build`, чтобы не перегружать сервер с малым объёмом RAM.
+TaskFlow собирается **multi-stage Docker-образом** (`node:20-alpine`):
+
+1. **frontend-builder** — Vite-сборка React → `frontend/dist/`
+2. **backend-builder** — TypeScript + Prisma → `server/dist/`
+3. **production** — только production-зависимости бэкенда и готовые артефакты
+
+Финальный образ лёгкий: без исходников, dev-зависимостей и инструментов сборки.
 
 ## Требования
 
 - VPS с Ubuntu 22.04+ (или другой Linux)
 - Docker Engine 24+ и Docker Compose v2
-- **На машине сборки** (локально или CI): Node.js 20+ для `npm run build:docker`
 - Открытый порт **3000** (или тот, что зададите в `.env`)
 - Домен (опционально, для HTTPS через Nginx/Caddy)
+
+> На сервере с малым объёмом RAM (~1 GB) добавьте swap перед сборкой или собирайте образ локально/в CI и пушьте в registry.
 
 ## Быстрый старт
 
@@ -43,27 +50,13 @@ nano .env
 | `JWT_SECRET` | Случайная строка (`openssl rand -hex 32`) |
 | `CORS_ORIGIN` | Публичный URL приложения, напр. `https://taskflow.example.com` |
 
-### 4. Соберите артефакты и запустите
-
-На сервере (или локально, затем загрузите образ):
+### 4. Запустите
 
 ```bash
-# Установка зависимостей (один раз)
-npm install
-npm install --prefix server
-
-# Сборка фронтенда → frontend/dist/
-# Сборка бэкенда → server/dist/ + Prisma client
-npm run build:docker
-
-# Применить схему БД (локальная dev-база; в Docker — автоматически при старте)
-# npm run db:push --prefix server
-
-# Сборка и запуск контейнера
 docker compose up -d --build
 ```
 
-Кратко: **`npm run build:docker`** создаёт `frontend/dist/` и `server/dist/`, которые копируются в образ.
+Сборка фронтенда и бэкенда выполняется автоматически внутри Docker (multi-stage). Отдельный `npm run build:docker` на хосте **не нужен**.
 
 Проверка:
 

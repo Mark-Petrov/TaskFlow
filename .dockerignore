@@ -2,10 +2,12 @@
 .git
 .gitignore
 
-# Dependencies & build output (сборки копируются в образ явно)
+# Dependencies & build output (собираются внутри multi-stage Dockerfile)
 node_modules
 server/node_modules
 dist
+frontend/dist
+server/dist
 
 # Local env & secrets
 .env
