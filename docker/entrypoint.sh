@@ -1,12 +1,12 @@
 #!/bin/sh
 set -e
 
-cd /app
+cd /app/server
 
 mkdir -p /data
 
 echo "Applying database schema..."
-npx prisma db push --skip-generate
+./node_modules/.bin/prisma db push --skip-generate
 
 echo "Starting TaskFlow..."
 exec node dist/index.js
