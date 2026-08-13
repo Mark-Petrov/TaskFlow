@@ -37,17 +37,30 @@ JWT_SECRET=<ваш секрет>
 
 ### Если сайт не открывается
 
-1. Проверьте, что контейнер слушает порт:
+**Симптом:** `curl` с Mac пишет `Connected`, но ответа нет (зависает), а на сервере `curl http://127.0.0.1:3000/api/health` работает.
+
+Это почти всегда **Docker + ufw/iptables**: порт «открыт», но пакеты не доходят до контейнера.
+
+1. Обновите код и перезапустите (в compose включён `network_mode: host`):
    ```bash
-   sudo docker compose -f docker-compose.prod.yml ps
-   sudo ss -tlnp | grep 3000
+   cd ~/TaskFlow
+   git pull
+   sudo docker compose -f docker-compose.prod.yml up -d --build
+   sudo ss -tlnp | grep 3000   # должен быть node, не docker-proxy
    ```
-2. **Фаервол VPS** — откройте порт 3000 в панели хостинга (Security Groups / Firewall).
-3. На Ubuntu:
+2. **Фаервол панели хостинга** — входящий TCP **3000** и **22** для всех адресов, группа **подключена** к серверу.
+3. **ufw** (если включён):
    ```bash
+   sudo ufw allow 22/tcp
    sudo ufw allow 3000/tcp
-   sudo ufw reload
+   sudo ufw status
    ```
+   Если не помогло — временно `sudo ufw disable` и проверьте с Mac снова.
+4. Проверка с Mac:
+   ```bash
+   curl -v --max-time 10 http://91.135.156.114:3000/api/health
+   ```
+   Должно вернуть `{"ok":true,...}`.
 
 ```bash
 docker compose -f docker-compose.prod.yml logs -f taskflow
@@ -72,6 +85,50 @@ PORT=3000
 # Mac
 npm run docker:export
 scp taskflow-image.tar.gz root@SERVER:~/
+
+# Server
+docker load < ~/taskflow-image.tar.gz
+docker compose -f docker-compose.prod.yml up -d --no-build
+```
+
+---
+
+## Docker Hub недоступен (ETIMEDOUT / registry-1.docker.io)
+
+Если при сборке падает тайм-аут на `node:20-alpine`, настройте **зеркало registry** на сервере:
+
+```bash
+sudo nano /etc/docker/daemon.json
+```
+
+```json
+{
+  "registry-mirrors": [
+    "https://mirror.gcr.io"
+  ]
+}
+```
+
+> Если в файле уже есть другие настройки — добавьте `"registry-mirrors"` внутрь существующего `{ ... }`.
+
+```bash
+sudo systemctl restart docker
+cd ~/TaskFlow
+sudo docker compose -f docker-compose.prod.yml up -d --build
+```
+
+Проверка, что зеркало применилось:
+
+```bash
+docker info | grep -A3 "Registry Mirrors"
+```
+
+**Альтернатива без сборки на сервере** — собрать образ на Mac и загрузить на VPS:
+
+```bash
+# Mac
+npm run docker:export
+scp taskflow-image.tar.gz root@91.135.156.114:~/
 
 # Server
 docker load < ~/taskflow-image.tar.gz

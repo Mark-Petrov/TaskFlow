@@ -8,8 +8,9 @@ services:
     image: taskflow:latest
     container_name: taskflow
     restart: unless-stopped
-    ports:
-      - "0.0.0.0:${PORT:-3000}:3000"
+    # Host network: Node слушает порт напрямую на VPS (без docker-proxy).
+    # Иначе при ufw/iptables внешние запросы часто зависают, а localhost работает.
+    network_mode: host
     environment:
       NODE_ENV: production
       PORT: 3000
@@ -20,7 +21,7 @@ services:
     volumes:
       - taskflow-data:/data
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:'+(process.env.PORT||'3000')+'/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
       interval: 30s
       timeout: 5s
       retries: 3
