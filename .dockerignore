@@ -2,8 +2,9 @@
 .git
 .gitignore
 
-# Dependencies (корневой frontend; server/node_modules копируется в образ после prepare:docker)
+# Dependencies (устанавливаются внутри Docker)
 node_modules
+server/node_modules
 
 # Исходники не нужны в образе — только dist
 src
