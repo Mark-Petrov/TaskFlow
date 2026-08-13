@@ -10,7 +10,7 @@
     "build": "tsc -b && vite build",
     "build:server": "npm run build --prefix server",
     "build:deploy": "npm run build && npm run build:server",
-    "docker:build": "npm run build && docker build -t taskflow:latest .",
+    "docker:build": "docker build -t taskflow:latest .",
     "docker:export": "npm run docker:build && docker save taskflow:latest | gzip > taskflow-image.tar.gz",
     "lint": "oxlint",
     "preview": "vite preview",

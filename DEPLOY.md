@@ -1,53 +1,59 @@
-# Деплой TaskFlow на VPS (Docker)
+# Деплой TaskFlow на VPS
 
-## Сборка на сервере (после добавления Swap)
+На сервере **не нужен npm** — multi-stage Dockerfile собирает всё внутри Docker.
+
+## Быстрый запуск (одна команда)
 
 ```bash
-# 1. Фронтенд — локально или на сервере (лёгкая сборка)
-npm run build
-
-# 2. На сервере — Docker собирает бэкенд сам (npm install + tsc + prisma)
+cd ~/TaskFlow
 git pull
-sudo docker compose build --no-cache
-sudo docker compose up -d
+cp .env.example .env   # первый раз: задайте JWT_SECRET и CORS_ORIGIN
+bash scripts/server-up.sh
 ```
 
-Docker **не копирует** `node_modules` с хоста — всё ставится внутри контейнера.
-
----
-
-## Сборка образа на Mac (альтернатива)
+## Ручной запуск
 
 ```bash
-npm run build
-npm run docker:export
-scp taskflow-image.tar.gz root@SERVER:~/
+sudo docker compose -f docker-compose.prod.yml up --build -d
 ```
 
-На сервере:
+## Проверка
 
 ```bash
-docker load < ~/taskflow-image.tar.gz
-./scripts/server-up.sh
+curl http://localhost:3000/api/health
+docker compose -f docker-compose.prod.yml logs -f taskflow
 ```
 
 ---
 
-## `.env`
+## `.env` (обязательно)
 
 ```env
-PORT=3000
 JWT_SECRET=<openssl rand -hex 32>
 CORS_ORIGIN=http://YOUR_IP:3000
 DATABASE_URL=file:/data/taskflow.db
+PORT=3000
 ```
 
 ---
 
-## Полезные команды
+## Готовый образ с Mac (без сборки на сервере)
 
 ```bash
-docker compose logs -f taskflow
-docker compose down
-curl http://localhost:3000/api/health
+# Mac
+npm run docker:export
+scp taskflow-image.tar.gz root@SERVER:~/
+
+# Server
+docker load < ~/taskflow-image.tar.gz
+docker compose -f docker-compose.prod.yml up -d --no-build
+```
+
+---
+
+## Локальная разработка
+
+```bash
+npm install && npm install --prefix server
+npm run dev:all
 ```

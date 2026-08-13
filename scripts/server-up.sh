@@ -1,22 +1,36 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
-if ! docker image inspect taskflow:latest >/dev/null 2>&1; then
-  echo ""
-  echo "❌  Образ taskflow:latest не найден на этом сервере."
-  echo ""
-  echo "Сборка на VPS не поддерживается (нет node_modules, мало RAM)."
-  echo ""
-  echo "На Mac выполните:"
-  echo "  npm run docker:export"
-  echo "  scp taskflow-image.tar.gz root@THIS_SERVER:~/"
-  echo ""
-  echo "Затем на сервере:"
-  echo "  docker load < ~/taskflow-image.tar.gz"
-  echo "  ./scripts/server-up.sh"
-  echo ""
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+COMPOSE_FILE="docker-compose.prod.yml"
+
+if [ ! -f "$COMPOSE_FILE" ]; then
+  echo "❌  Не найден $COMPOSE_FILE"
   exit 1
 fi
 
-docker compose -f docker-compose.prod.yml up -d --no-build
+if [ ! -f .env ]; then
+  echo "⚠️  Файл .env не найден — создайте из .env.example"
+  echo "   cp .env.example .env && nano .env"
+  exit 1
+fi
+
+run_compose() {
+  docker compose -f "$COMPOSE_FILE" up -d --build "$@"
+}
+
+echo "→ Сборка и запуск TaskFlow (npm на сервере не нужен)..."
+
+if docker info >/dev/null 2>&1; then
+  run_compose
+elif command -v sudo >/dev/null 2>&1; then
+  sudo docker compose -f "$COMPOSE_FILE" up -d --build
+else
+  echo "❌  Нет доступа к Docker. Запустите от root или добавьте пользователя в группу docker."
+  exit 1
+fi
+
 echo "✓ TaskFlow запущен → http://localhost:${PORT:-3000}"
+echo "  Логи: docker compose -f $COMPOSE_FILE logs -f taskflow"

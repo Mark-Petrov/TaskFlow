@@ -1,18 +1,6 @@
-# Git
-.git
-.gitignore
-
-# Dependencies (устанавливаются внутри Docker)
+# Dependencies (ставятся внутри multi-stage Dockerfile)
 node_modules
 server/node_modules
-
-# Исходники не нужны в образе — только dist
-src
-server/src
-server/tsconfig.json
-
-# Старый корневой dist (vite legacy)
-dist
 
 # Local env & secrets
 .env
@@ -27,6 +15,8 @@ server/prisma/*.db
 server/prisma/*.db-journal
 
 # Editor & OS
+.git
+.gitignore
 .vscode
 .idea
 .DS_Store
@@ -39,4 +29,7 @@ docker-compose.override.yml
 agent-transcripts
 assets
 
-# frontend/dist и server/dist НЕ игнорируем — они копируются в образ
+# Локальные артефакты сборки не нужны — Docker собирает сам
+dist
+frontend/dist
+server/dist
