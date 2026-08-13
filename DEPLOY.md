@@ -21,6 +21,35 @@ sudo docker compose -f docker-compose.prod.yml up --build -d
 
 ```bash
 curl http://localhost:3000/api/health
+curl http://91.135.156.114:3000/api/health   # с вашего компьютера
+```
+
+**Открыть в браузере:** http://91.135.156.114:3000
+
+### `.env` на сервере (важно для CORS)
+
+```env
+CORS_ORIGIN=http://91.135.156.114:3000
+HOST=0.0.0.0
+PORT=3000
+JWT_SECRET=<ваш секрет>
+```
+
+### Если сайт не открывается
+
+1. Проверьте, что контейнер слушает порт:
+   ```bash
+   sudo docker compose -f docker-compose.prod.yml ps
+   sudo ss -tlnp | grep 3000
+   ```
+2. **Фаервол VPS** — откройте порт 3000 в панели хостинга (Security Groups / Firewall).
+3. На Ubuntu:
+   ```bash
+   sudo ufw allow 3000/tcp
+   sudo ufw reload
+   ```
+
+```bash
 docker compose -f docker-compose.prod.yml logs -f taskflow
 ```
 

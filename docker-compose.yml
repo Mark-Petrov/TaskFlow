@@ -7,10 +7,11 @@ services:
     container_name: taskflow
     restart: unless-stopped
     ports:
-      - "${PORT:-3000}:3000"
+      - "0.0.0.0:${PORT:-3000}:3000"
     environment:
       NODE_ENV: production
       PORT: 3000
+      HOST: 0.0.0.0
       DATABASE_URL: ${DATABASE_URL:-file:/data/taskflow.db}
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}

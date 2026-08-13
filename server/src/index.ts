@@ -9,6 +9,7 @@ import app from './app.js'
 import { setSocketServer } from './services/notifications.js'
 import type { AuthPayload } from './middleware/auth.js'
 
+const HOST = process.env.HOST || '0.0.0.0'
 const PORT = Number(process.env.PORT) || 3001
 
 const httpServer = createServer(app)
@@ -65,6 +66,6 @@ function ensureDatabase() {
 
 ensureDatabase()
 
-httpServer.listen(PORT, '0.0.0.0', () => {
-  console.log(`TaskFlow API + WebSocket → http://0.0.0.0:${PORT}`)
+httpServer.listen(PORT, HOST, () => {
+  console.log(`TaskFlow API + WebSocket → http://${HOST}:${PORT}`)
 })
